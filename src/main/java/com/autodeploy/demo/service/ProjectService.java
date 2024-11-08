@@ -1,4 +1,3 @@
-
 package com.autodeploy.demo.service;
 
 import com.autodeploy.demo.entity.Project;
@@ -18,15 +17,24 @@ public class ProjectService {
     @Autowired
     private UserService userService;
 
-    public Project createProject(String userUuid, String projectName) {
+    public Project createProject(String userUuid, String projectName, String message) {
         User user = userService.getUserByUuid(userUuid);
         if (user == null) {
             throw new RuntimeException("User not found");
         }
 
-        Project project = new Project(userUuid, projectName);
+        Project project = new Project(userUuid, projectName, message);
+        return projectRepository.save(project);
+    }
 
-        
+    public Project createProjectWithDetails(String userUuid, String projectName, 
+                                         String appName, String vision, String message) {
+        User user = userService.getUserByUuid(userUuid);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        Project project = new Project(userUuid, projectName, appName, vision, message);
         return projectRepository.save(project);
     }
 
