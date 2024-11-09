@@ -55,4 +55,8 @@ public class ProjectService {
     public List<Project> getUserProjects(String userUuid) {
         return projectRepository.findByUseruuid(userUuid);
     }
+
+    public void deleteProject(String projectId) {
+        projectRepository.deleteById(projectId);
+    }
 } 

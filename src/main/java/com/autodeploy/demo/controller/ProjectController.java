@@ -85,4 +85,16 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(response);
         }
     }
+    
+    @PostMapping("/{projectId}/delete")
+    public ResponseEntity<?> deleteProject(@PathVariable String projectId) {
+        try {
+            projectService.deleteProject(projectId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            JSONObject response = new JSONObject();
+            response.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
 } 

@@ -163,4 +163,14 @@ public class ServerService {
             }
         }
     }
+
+    public Server findServerById(String serverId) {
+        return serverRepository.findById(serverId)
+            .orElseThrow(() -> new RuntimeException("服务器不存在"));
+    }
+
+    public void deleteServer(String serverId) {
+        serverRepository.deleteById(serverId);
+    }
+
 } 
