@@ -62,6 +62,20 @@ public class DeployerController {
         }
     }
 
+    @DeleteMapping("/{deployerId}/servers/{serverId}")
+    public ResponseEntity<Void> removeServer(
+            @PathVariable String deployerId,
+            @PathVariable String serverId) {
+        try {
+            Deployer deployer = deployerService.getDeployerById(deployerId);
+            deployer.getServerIds().remove(serverId);
+            deployerService.updateDeployer(deployer);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @GetMapping("/project/{projectId}")
     public ResponseEntity<List<Deployer>> getProjectDeployers(@PathVariable String projectId) {
         List<Deployer> deployers = deployerService.getProjectDeployers(projectId);

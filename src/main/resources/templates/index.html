@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>自动部署平台</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div id="main-container" class="container">
+        <div class="top-nav">
+            <span th:text="${session.user.username}"></span>
+            <a href="/logout" class="logout-btn">退出登录</a>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <h3>项目列表</h3>
+                <div id="project-list">
+                    <div th:each="project : ${projects}" class="project-item">
+                        <a th:href="@{/project/{id}(id=${project.projectId})}" 
+                           th:text="${project.projectName}" 
+                           th:data-project-id="${project.projectId}"></a>
+                    </div>
+                </div>
+                <button onclick="location.href='/project/add'" class="add-btn">添加项目</button>
+            </div>
+
+            <div class="content">
+                <div class="deploy-section">
+                    <h3>部署配置</h3>
+                    <div id="deployer-list">
+                        <div th:each="deployer : ${deployers}" class="deployer-item">
+                            <h4 th:text="${deployer.appName}"></h4>
+                            <p th:text="'部署目录: ' + ${deployer.deployDir}"></p>
+                            <div class="actions">
+                                <a th:href="@{/deployer/{id}(id=${deployer.deployerId})}" class="btn btn-info">查看详情</a>
+                                <button th:data-deployer-id="${deployer.deployerId}" 
+                                        onclick="deploy(this.getAttribute('data-deployer-id'))">部署</button>
+                                <button th:data-deployer-id="${deployer.deployerId}" 
+                                        onclick="deleteDeployer(this.getAttribute('data-deployer-id'))">删除</button>
+                            </div>
+                        </div>
+                    </div>
+                    <a th:href="@{/deployer/add(projectId=${projectId})}" class="add-btn">添加部署配置</a>
+                </div>
+                <div class="gather-section">
+                    <h3>采集配置</h3>
+                    <div id="gatherer-list">
+                        <!-- 采集配置列表 -->
+                    </div>
+                    <button onclick="location.href='/gatherer/add'" class="add-btn">添加采集配置</button>
+                </div>
+            </div>
+
+            <div class="server-sidebar">
+                <h3>服务器列表</h3>
+                <div id="server-list">
+                    <div th:each="server : ${servers}" class="server-item">
+                        <div class="server-info">
+                            <span th:text="${server.ipAddress + ':' + server.port}"></span>
+                            <div class="server-actions">
+                                <button onclick="testConnection(this)" th:data-server-id="${server.serverId}" 
+                                        class="btn btn-sm btn-test">测试连接</button>
+                                <button onclick="deleteServer(this)" th:data-server-id="${server.serverId}" 
+                                        class="btn btn-sm btn-danger">删除</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="showAddServerForm()" class="add-btn">添加服务器</button>
+            </div>
+        </div>
+    </div>
+    
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html> 

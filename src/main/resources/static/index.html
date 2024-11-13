@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>自动部署平台</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 登录/注册表单 -->
+    <div id="auth-container" class="container">
+        <div class="auth-form">
+            <h2>登录</h2>
+            <form id="login-form">
+                <input type="text" id="username" placeholder="用户名" required>
+                <input type="password" id="password" placeholder="密码" required>
+                <button type="submit">登录</button>
+            </form>
+            <p>还没有账号？<a href="#" onclick="toggleForm()">立即注册</a></p>
+        </div>
+
+        <div class="auth-form" style="display: none;">
+            <h2>注册</h2>
+            <form id="register-form">
+                <input type="text" id="reg-username" placeholder="用户名" required>
+                <input type="password" id="reg-password" placeholder="密码" required>
+                <input type="email" id="reg-email" placeholder="邮箱" required>
+                <button type="submit">注册</button>
+            </form>
+            <p>已有账号？<a href="#" onclick="toggleForm()">去登录</a></p>
+        </div>
+    </div>
+
+    <!-- 主界面 -->
+    <div id="main-container" class="container" style="display: none;">
+        <div class="sidebar">
+            <h3>项目列表</h3>
+            <div id="project-list"></div>
+        </div>
+        <div class="content">
+            <div class="deploy-section">
+                <h3>部署配置</h3>
+                <div id="deployer-list"></div>
+                <button onclick="showAddDeployerForm()">添加部署配置</button>
+            </div>
+            <div class="gather-section">
+                <h3>采集配置</h3>
+                <div id="gatherer-list"></div>
+                <button onclick="showAddGathererForm()">添加采集配置</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html> 

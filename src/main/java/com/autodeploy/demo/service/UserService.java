@@ -1,5 +1,7 @@
 package com.autodeploy.demo.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +13,8 @@ import java.util.UUID;
 
 @Service
 public class UserService {
+    
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     
     @Autowired
     private UserMapper userMapper;
@@ -29,7 +33,7 @@ public class UserService {
 
         User user = new User();
         user.setUsername(username);
-        user.setPassword(password); // 实际应用中应该对密码进行加密
+        user.setPassword(password);
         user.setEmail(email);
         user.setUuid(UUID.randomUUID().toString());
 
@@ -37,10 +41,20 @@ public class UserService {
     }
 
     public User login(String username, String password) {
+        logger.info("尝试验证用户: {}", username);
         User user = userMapper.findByUsername(username);
-        if (user == null || !user.getPassword().equals(password)) { // 实际应用中应该对密码进行加密比较
+        
+        if (user == null) {
+            logger.error("用户{}不存在", username);
             throw new RuntimeException("用户名或密码错误");
         }
+        
+        if (!password.equals(user.getPassword())) {
+            logger.error("用户{}密码错误", username);
+            throw new RuntimeException("用户名或密码错误");
+        }
+        
+        logger.info("用户{}验证成功", username);
         return user;
     }
 

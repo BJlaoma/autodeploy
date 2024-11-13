@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>部署配置详情</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <div class="detail-card">
+            <h2>部署配置详情</h2>
+            <div class="detail-content">
+                <div class="detail-item">
+                    <label>应用名称：</label>
+                    <span th:text="${deployer.appName}"></span>
+                </div>
+                <div class="detail-item">
+                    <label>部署目录：</label>
+                    <span th:text="${deployer.deployDir}"></span>
+                </div>
+                <div class="detail-item">
+                    <label>Shell脚本路径：</label>
+                    <span th:text="${deployer.shPath}"></span>
+                </div>
+                <div class="detail-item">
+                    <label>部署时间：</label>
+                    <span th:text="${deployer.deployTime}"></span>
+                </div>
+                
+                <!-- 服务器管理部分 -->
+                <div class="server-management">
+                    <h3>服务器管理</h3>
+                    <div class="server-list">
+                        <div th:each="server : ${servers}" class="server-item">
+                            <div class="server-info">
+                                <span th:text="${server.ipAddress + ':' + server.port}"></span>
+                                <div class="server-actions">
+                                    <button th:data-server-id="${server.serverId}" 
+                                            onclick="testConnection(this)" 
+                                            class="btn btn-sm btn-test">测试连接</button>
+                                    <button th:data-server-id="${server.serverId}"
+                                            th:data-deployer-id="${deployer.deployerId}"
+                                            onclick="removeServer(this)" 
+                                            class="btn btn-sm btn-danger">移除</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 添加服务器表单 -->
+                    <div class="add-server-form">
+                        <h4>添加服务器</h4>
+                        <select id="serverSelect">
+                            <option value="">选择服务器</option>
+                            <option th:each="availServer : ${availableServers}" 
+                                    th:value="${availServer.serverId}"
+                                    th:text="${availServer.ipAddress + ':' + availServer.port}">
+                            </option>
+                        </select>
+                        <input type="hidden" id="deployerId" th:value="${deployer.deployerId}">
+                        <button onclick="addServer()" class="btn btn-primary">添加</button>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button th:data-deployer-id="${deployer.deployerId}" 
+                            onclick="deploy(this.getAttribute('data-deployer-id'))"
+                            class="btn btn-primary">部署</button>
+                    <button th:data-deployer-id="${deployer.deployerId}" 
+                            onclick="deleteDeployer(this.getAttribute('data-deployer-id'))"
+                            class="btn btn-danger">删除</button>
+                    <button onclick="history.back()" class="btn btn-secondary">返回</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script th:src="@{/js/main.js}"></script>
+    <script>
+        function addServer() {
+            const serverSelect = document.getElementById('serverSelect');
+            const serverId = serverSelect.value;
+            const deployerId = document.getElementById('deployerId').value;
+            
+            if (!serverId) {
+                alert('请选择服务器');
+                return;
+            }
+
+            fetch(`/api/deployers/${deployerId}/servers`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    serverIds: [serverId]
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('添加服务器失败');
+                }
+            })
+            .catch(error => alert('添加服务器失败：' + error));
+        }
+
+        function removeServer(button) {
+            const serverId = button.getAttribute('data-server-id');
+            const deployerId = button.getAttribute('data-deployer-id');
+            
+            if (confirm('确定要移除此服务器吗？')) {
+                fetch(`/api/deployers/${deployerId}/servers/${serverId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('移除服务器失败');
+                    }
+                })
+                .catch(error => alert('移除服务器失败：' + error));
+            }
+        }
+    </script>
+</body>
+</html> 

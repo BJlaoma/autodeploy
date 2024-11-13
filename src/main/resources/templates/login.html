@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>登录 - 自动部署平台</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <div class="auth-form">
+            <h2>登录</h2>
+            <form th:action="@{/auth/login}" method="post">
+                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                <input type="text" name="username" placeholder="用户名" required>
+                <input type="password" name="password" placeholder="密码" required>
+                <button type="submit">登录</button>
+            </form>
+            <p>还没有账号？<a th:href="@{/auth/register}">立即注册</a></p>
+        </div>
+    </div>
+</body>
+</html> 
