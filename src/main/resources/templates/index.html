@@ -35,22 +35,32 @@
                             <h4 th:text="${deployer.appName}"></h4>
                             <p th:text="'部署目录: ' + ${deployer.deployDir}"></p>
                             <div class="actions">
-                                <a th:href="@{/deployer/{id}(id=${deployer.deployerId})}" class="btn btn-info">查看详情</a>
-                                <button th:data-deployer-id="${deployer.deployerId}" 
+                                <button th:attr="data-deployer-id=${deployer.deployerId}" 
                                         onclick="deploy(this.getAttribute('data-deployer-id'))">部署</button>
-                                <button th:data-deployer-id="${deployer.deployerId}" 
+                                <button th:attr="data-deployer-id=${deployer.deployerId},data-project-id=${projectId}" 
+                                        onclick="showAddGathererForm(this.getAttribute('data-deployer-id'), this.getAttribute('data-project-id'))">添加采集配置</button>
+                                <button th:attr="data-deployer-id=${deployer.deployerId}" 
                                         onclick="deleteDeployer(this.getAttribute('data-deployer-id'))">删除</button>
+                            </div>
+                            <div class="gatherer-list" th:if="${gatherersByDeployer != null}">
+                                <h5>采集配置列表：</h5>
+                                <div th:each="gatherer : ${gatherersByDeployer.get(deployer.deployerId)}" class="gatherer-item">
+                                    <h6 th:text="${gatherer.gathererName}"></h6>
+                                    <p th:text="'代理路径: ' + ${gatherer.agentPath}"></p>
+                                    <p th:text="'日志路径: ' + ${gatherer.logPath}"></p>
+                                    <div class="gatherer-actions">
+                                        <button th:attr="data-gatherer-id=${gatherer.gathererId}" 
+                                                onclick="showGathererDetail(this.getAttribute('data-gatherer-id'))"
+                                                class="btn-info">查看详情</button>
+                                        <button th:attr="data-gatherer-id=${gatherer.gathererId}" 
+                                                onclick="deleteGatherer(this.getAttribute('data-gatherer-id'))"
+                                                class="btn-danger">删除</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <a th:href="@{/deployer/add(projectId=${projectId})}" class="add-btn">添加部署配置</a>
-                </div>
-                <div class="gather-section">
-                    <h3>采集配置</h3>
-                    <div id="gatherer-list">
-                        <!-- 采集配置列表 -->
-                    </div>
-                    <button onclick="location.href='/gatherer/add'" class="add-btn">添加采集配置</button>
+                    <a th:if="${projectId != null}" th:href="@{/deployer/add(projectId=${projectId})}" class="add-btn">添加部署配置</a>
                 </div>
             </div>
 
@@ -61,9 +71,11 @@
                         <div class="server-info">
                             <span th:text="${server.ipAddress + ':' + server.port}"></span>
                             <div class="server-actions">
-                                <button onclick="testConnection(this)" th:data-server-id="${server.serverId}" 
+                                <button th:attr="data-server-id=${server.serverId}" 
+                                        onclick="testConnection(this)" 
                                         class="btn btn-sm btn-test">测试连接</button>
-                                <button onclick="deleteServer(this)" th:data-server-id="${server.serverId}" 
+                                <button th:attr="data-server-id=${server.serverId}" 
+                                        onclick="deleteServer(this)" 
                                         class="btn btn-sm btn-danger">删除</button>
                             </div>
                         </div>

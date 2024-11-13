@@ -1,6 +1,7 @@
 package com.autodeploy.demo.controller;
 
 import com.autodeploy.demo.entity.Deployer;
+import com.autodeploy.demo.entity.Gatherer;
 import com.autodeploy.demo.entity.Server;
 import com.autodeploy.demo.entity.User;
 import com.autodeploy.demo.service.UserService;
@@ -8,6 +9,7 @@ import com.autodeploy.demo.service.ProjectService;
 import com.autodeploy.demo.service.DeployerService;
 import com.autodeploy.demo.service.ServerService;
 import com.autodeploy.demo.service.FileService;
+import com.autodeploy.demo.service.GatherService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,8 @@ import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 public class WebController {
@@ -40,6 +44,9 @@ public class WebController {
 
     @Autowired
     private FileService fileService;
+
+    @Autowired
+    private GatherService gatherService;
 
     @GetMapping("/")
     public String index(HttpSession session, Model model) {
@@ -107,7 +114,6 @@ public class WebController {
 
     @GetMapping("/project/{id}")
     public String projectDetail(@PathVariable String id, Model model, HttpSession session) {
-        logger.info("访问项目详情，项目ID: {}", id);
         User user = (User) session.getAttribute("user");
         if (user == null) {
             return "redirect:/auth/login";
@@ -118,9 +124,17 @@ public class WebController {
             model.addAttribute("projects", projectService.getUserProjects(user.getUuid()));
             
             // 加载部署配置
-            logger.info("加载项目{}的部署配置", id);
-            model.addAttribute("deployers", deployerService.getProjectDeployers(id));
+            List<Deployer> deployers = deployerService.getProjectDeployers(id);
+            model.addAttribute("deployers", deployers);
             model.addAttribute("projectId", id);
+            
+            // 加载每个部署配置对应的采集配置
+            Map<String, List<Gatherer>> gatherersByDeployer = new HashMap<>();
+            for (Deployer deployer : deployers) {
+                List<Gatherer> gatherers = gatherService.getGatherersByDeployerId(deployer.getDeployerId());
+                gatherersByDeployer.put(deployer.getDeployerId(), gatherers);
+            }
+            model.addAttribute("gatherersByDeployer", gatherersByDeployer);
             
             // 加载用户的服务器列表
             model.addAttribute("servers", serverService.findServersByUserUuid(user.getUuid()));
@@ -255,6 +269,43 @@ public class WebController {
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
             return "project-add";
+        }
+    }
+
+    @GetMapping("/gatherer/add")
+    public String showAddGathererForm(@RequestParam String deployerId, 
+                                        @RequestParam String projectId, 
+                                        Model model, 
+                                        HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/auth/login";
+        }
+        
+        model.addAttribute("deployerId", deployerId);
+        model.addAttribute("projectId", projectId);
+        
+        return "gatherer-add";
+    }
+
+    @PostMapping("/gatherer/add")
+    public String addGatherer(@RequestParam String deployerId,
+                         @RequestParam String projectId,
+                         @RequestParam String gathererName,
+                         @RequestParam String agentPath,
+                         @RequestParam String logPath,
+                         HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/auth/login";
+        }
+        
+        try {
+            Gatherer gatherer = gatherService.createGatherer(deployerId, projectId, gathererName, agentPath, logPath);
+            gatherService.addGatherer(gatherer);
+            return "redirect:/project/" + projectId;
+        } catch (Exception e) {
+            return "redirect:/gatherer/add?error=" + e.getMessage() + "&deployerId=" + deployerId + "&projectId=" + projectId;
         }
     }
 } 
